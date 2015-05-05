@@ -40,7 +40,7 @@ import importlib
 import itertools
 import re
 
-from jaraco.test import paths
+from jaraco.services import paths
 
 DEV_NULL = open(os.path.devnull, 'r+')
 

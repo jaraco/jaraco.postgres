@@ -27,6 +27,7 @@ setup_params = dict(
 	include_package_data=True,
 	namespace_packages=['jaraco'],
 	install_requires=[
+		'jaraco.services',
 	],
 	setup_requires=[
 		'setuptools_scm',
