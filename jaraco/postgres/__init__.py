@@ -481,16 +481,27 @@ class PostgresServer(object):
 class PostgresFinder(paths.PathFinder):
 	# Where are the postgres executables?  Consider the following pathnames in
 	# order.
-	candidate_paths = [
+	heuristic_paths = [
 		# look on $PATH
 		'',
 		'/usr/local/pgsql/bin/',
 		'/Program Files/pgsql/bin',
 	]
 	# Prefer the highest-numbered version available.
-	candidate_paths.extend(
+	heuristic_paths.extend(
 		sorted(glob.glob('/usr/lib/postgresql/*/bin'), reverse=True)
 	)
+
+	# allow the environment to stipulate where Postgres must
+	#  be found.
+	env_paths = [
+		os.path.join(os.environ[key], 'bin')
+		for key in ['POSTGRESQL_HOME']
+		if key in os.environ
+	]
+
+	candidate_paths = env_paths or heuristic_paths
+
 	exe = 'pg_ctl'
 	args = ['--version']
 
