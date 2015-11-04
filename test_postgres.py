@@ -12,12 +12,12 @@ from subprocess import CalledProcessError
 import unittest  # We use unittest just for its helpful assertXxxx() methods.
 
 import psycopg2
+import portend
 
 import jaraco.postgres as pgtools
 
 
-# What's an unused, available port number that we can use for testing?
-UNUSED_PORT = 18746
+UNUSED_PORT = portend.find_available_local_port()
 
 
 class Test_PostgresDatabase(unittest.TestCase):
