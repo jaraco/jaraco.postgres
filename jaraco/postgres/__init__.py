@@ -400,28 +400,37 @@ class PostgresServer(object):
 
 		is_running = votes > 0
 
-		if is_running:
-			# postgres now talks to pg_ctl, but it might not yet be listening
-			# for connections from psql.  We don't want to claim that postgres
-			# is up until psql is able to connect.  (It occasionally takes
-			# 5-10 seconds for postgresql to start listening!)
-			cmd = [
-				PSQL,
-				'-h', self.host,
-				'-p', self.port,
-				'-U', self.superuser,
-			]
-			for i in range(50, -1, -1):
-				res = subprocess.call(cmd, stdin=DEV_NULL, stdout=DEV_NULL,
-					stderr=DEV_NULL)
-				if res == 0:
-					break
-				time.sleep(0.2)
-			if i == 0:
-				tmpl = 'The %s is supposedly up, but "%s" cannot connect'
-				raise RuntimeError(tmpl % (self, ' '.join(cmd)))
+		return is_running and (self._assert_ready() or True)
 
-		return is_running
+	def _assert_ready(self):
+		if self.ready():
+			return
+		cmd = self._psql_cmd()
+		tmpl = 'The %s is supposedly up, but "%s" cannot connect'
+		raise RuntimeError(tmpl % (self, ' '.join(cmd)))
+
+	def _psql_cmd(self):
+		return [
+			PSQL,
+			'-h', self.host,
+			'-p', self.port,
+			'-U', self.superuser,
+		]
+
+	def ready(self):
+		"""
+		Assumes postgres now talks to pg_ctl, but might not yet be listening
+		or connections from psql.  Test that psql is able to connect, as
+		it occasionally takes 5-10 seconds for postgresql to start listening.
+		"""
+		cmd = self._psql_cmd()
+		for i in range(50, -1, -1):
+			res = subprocess.call(cmd, stdin=DEV_NULL, stdout=DEV_NULL,
+				stderr=DEV_NULL)
+			if res == 0:
+				break
+			time.sleep(0.2)
+		return i != 0
 
 	@property
 	def pid(self):
