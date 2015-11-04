@@ -511,7 +511,7 @@ class PostgresServer(object):
 
 		Don't return until it's terminated.
 		"""
-		if self.is_running():
+		if self._is_running():
 			cmd = [
 				PG_CTL,
 				'stop',
@@ -523,8 +523,9 @@ class PostgresServer(object):
 			if self.pid:
 				os.kill(self.pid, signal.SIGTERM)
 		# Can't use wait() because the server might not be our child
-		while self.is_running():
+		while self._is_running():
 			time.sleep(0.1)
+
 
 class PostgresFinder(paths.PathFinder):
 	# Where are the postgres executables?  Consider the following pathnames in
