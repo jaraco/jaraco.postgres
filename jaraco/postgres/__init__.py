@@ -87,10 +87,13 @@ class PostgresDatabase(object):
 		self.template = template
 
 	def __repr__(self):
-		return ('PostgresDatabase(db_name=%s, user=%s, host=%s, port=%s,'
-				' superuser=%s, template=%s)') % (self.db_name, self.user,
-												  self.host,
-												  self.port, self.superuser, self.template)
+		tmpl = (
+			'PostgresDatabase(db_name=%s, '
+			'user=%s, host=%s, port=%s, '
+			'superuser=%s, template=%s)'
+		)
+		return tmpl % (self.db_name, self.user, self.host,
+			self.port, self.superuser, self.template)
 
 	__str__ = __repr__
 
@@ -212,7 +215,7 @@ class PostgresDatabase(object):
 		psycopg2 = importlib.import_module('psycopg2')
 		importlib.import_module('psycopg2.extensions')
 		connection = psycopg2.connect(user=self.user, host=self.host,
-									  port=self.port, database=self.db_name)
+			port=self.port, database=self.db_name)
 		connection.set_isolation_level(
 			psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 		try:
@@ -230,14 +233,19 @@ class PostgresDatabase(object):
 		"""Just like .psql(), except that we connect as the database superuser
 		(and we connect to the superuser's database, not the user's database).
 		"""
-		argv = [PSQL, '--quiet', '-U', self.superuser, '-h', self.host, '-p',
-				self.port] + args
+		argv = [
+			PSQL,
+			'--quiet',
+			'-U', self.superuser,
+			'-h', self.host,
+			'-p', self.port,
+		] + args
 		subprocess.check_call(argv)
 
 
 class PostgresServer(object):
 	def __init__(self, host='localhost', port=5432, base_pathname=None,
-				 superuser='postgres'):
+			superuser='postgres'):
 		"""This class represents a DBMS server.
 
 		This class can represent either
@@ -264,8 +272,12 @@ class PostgresServer(object):
 		self.superuser = superuser
 
 	def __repr__(self):
-		tmpl = ('PostgresServer(host={host}, port={port}, '
-				'base_pathname={base_pathname}, superuser={superuser})')
+		tmpl = (
+			'PostgresServer(host={host}, '
+			'port={port}, '
+			'base_pathname={base_pathname}, '
+			'superuser={superuser})'
+		)
 		return tmpl.format(**vars(self))
 
 	def __str__(self):
@@ -317,8 +329,13 @@ class PostgresServer(object):
 			os.mkdir(self.base_pathname)
 		stdout = DEV_NULL if quiet else None
 		# The database superuser needs no password at this point(!).
-		subprocess.check_call([INITDB, '--auth=trust', '--username',
-							   self.superuser, '--pgdata', self.base_pathname], stdout=stdout)
+		cmd = [
+			INITDB,
+			'--auth=trust',
+			'--username', self.superuser,
+			'--pgdata', self.base_pathname,
+		]
+		subprocess.check_call(cmd, stdout=stdout)
 
 	@property
 	def data_directory(self):
@@ -379,18 +396,21 @@ class PostgresServer(object):
 			# for connections from psql.  We don't want to claim that postgres
 			# is up until psql is able to connect.  (It occasionally takes
 			# 5-10 seconds for postgresql to start listening!)
-			cmd = [PSQL, '-h', self.host, '-p', self.port, '-U',
-				   self.superuser]
+			cmd = [
+				PSQL,
+				'-h', self.host,
+				'-p', self.port,
+				'-U', self.superuser,
+			]
 			for i in range(50, -1, -1):
 				res = subprocess.call(cmd, stdin=DEV_NULL, stdout=DEV_NULL,
-									  stderr=DEV_NULL)
+					stderr=DEV_NULL)
 				if res == 0:
 					break
 				time.sleep(0.2)
 			if i == 0:
-				raise RuntimeError('The %s is supposedly up, but "%s" cannot '
-								   'connect'
-								   % (self, ' '.join(cmd)))
+				tmpl = 'The %s is supposedly up, but "%s" cannot connect'
+				raise RuntimeError(tmpl % (self, ' '.join(cmd)))
 
 		return votes > 0
 
@@ -401,7 +421,6 @@ class PostgresServer(object):
 		# We can't possibly be running if our base_pathname isn't defined.
 		if not self.base_pathname:
 			return None
-
 		try:
 			pidfile = os.path.join(self.base_pathname, 'postmaster.pid')
 			return int(open(pidfile).readline())
@@ -429,13 +448,13 @@ class PostgresServer(object):
 		you probably want to skip this step!
 		"""
 		if not self.base_pathname:
-			raise NotInitializedError('Invalid base_pathname: %r.  '
-									  'Did you forget to call .initdb()?' % self.base_pathname)
+			tmpl = 'Invalid base_pathname: %r.  Did you forget to call .initdb()?'
+			raise NotInitializedError(tmpl % self.base_pathname)
 
 		conf_file = os.path.join(self.base_pathname, 'postgresql.conf')
 		if not os.path.exists(conf_file):
-			raise NotInitializedError('No config file at: %r.  '
-									  'Did you forget to call .initdb()?' % self.base_pathname)
+			tmpl = 'No config file at: %r.  Did you forget to call .initdb()?'
+			raise NotInitializedError(tmpl % self.base_pathname)
 
 		if not self.is_running():
 			version = self.get_version()
@@ -462,7 +481,8 @@ class PostgresServer(object):
 		# Postgres may launch, then abort if it's unhappy with some parameter.
 		# This post-launch test helps us decide.
 		if not self.is_running():
-			raise RuntimeError('%s aborted immediately after launch, check postgresql.log in storage dir' % self)
+			tmpl = '%s aborted immediately after launch, check postgresql.log in storage dir'
+			raise RuntimeError(tmpl % self)
 
 	def stop(self):
 		"""Stop this DMBS daemon.  If it's not currently running, do nothing.
@@ -470,8 +490,13 @@ class PostgresServer(object):
 		Don't return until it's terminated.
 		"""
 		if self.is_running():
-			subprocess.check_call([PG_CTL, 'stop', '-D', self.base_pathname,
-								   '-m', 'fast'])
+			cmd = [
+				PG_CTL,
+				'stop',
+				'-D', self.base_pathname,
+				'-m', 'fast',
+			]
+			subprocess.check_call(cmd)
 			# pg_ctl isn't reliable if it's called at certain critical times
 			if self.pid:
 				os.kill(self.pid, signal.SIGTERM)
