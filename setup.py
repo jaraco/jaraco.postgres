@@ -34,6 +34,7 @@ setup_params = dict(
 	] + pytest_runner + sphinx,
 	tests_require=[
 		'pytest',
+		'psycopg2',
 	],
 	classifiers=[
 		"Development Status :: 5 - Production/Stable",
