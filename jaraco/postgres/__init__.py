@@ -362,7 +362,8 @@ class PostgresServer(object):
 		return subprocess.check_output(cmd)
 
 	def is_running(self, tries=10):
-		"""Is this server currently running?
+		"""
+		Return True if this server is currently running and reachable.
 
 		The postgres tools have critical windows during which they give
 		misbehave
@@ -372,11 +373,10 @@ class PostgresServer(object):
 			  be able to connect to it, or
 			- it might be about to abort because of a configuration problem,
 			- or all three!  It might be starting up, but about to abort.
-		Sadly, it's not easy to make a declaration about state if we just
-		started
-		or stopped postgres.  To increase confidence, we'll make repeated
-		checks,
-		and declare our decision only after <tries> consecutive measurements
+		Sadly, it's not easy to make a declaration about state if the server
+		just started
+		or stopped.  To increase confidence, makes repeated checks,
+		and declares a decision only after <tries> consecutive measurements
 		agree.
 		"""
 		# We can't possibly be running if our base_pathname isn't defined.
