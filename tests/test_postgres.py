@@ -1,16 +1,17 @@
 import os
 from unittest import TestCase
 
+import portend
 from jaraco.postgres import PostgresDatabase, PostgresServer
 
 
 HOST = os.environ.get('HOST', 'localhost')
-PORT = int(os.environ.get('PORT', 5432))
 
 
 class PostgresServerTest(TestCase):
     def test_serves_postgres(self):
-        server = PostgresServer(HOST, PORT)
+        port = portend.find_available_local_port()
+        server = PostgresServer(HOST, port)
         server.initdb()
 
         try:
@@ -25,7 +26,8 @@ class PostgresServerTest(TestCase):
 
 class PostgresDatabaseTest(TestCase):
     def setUp(self):
-        self.server = PostgresServer(HOST, PORT)
+        self.port = portend.find_available_local_port()
+        self.server = PostgresServer(HOST, self.port)
         self.server.initdb()
         self.server.start()
 
@@ -33,7 +35,7 @@ class PostgresDatabaseTest(TestCase):
         self.server.destroy()
 
     def test_creates_user_and_database(self):
-        database = PostgresDatabase('tests', user='john', host=HOST, port=PORT)
+        database = PostgresDatabase('tests', user='john', host=HOST, port=self.port)
 
         database.create_user()
         database.create()
