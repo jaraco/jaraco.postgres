@@ -1,7 +1,7 @@
 # vim: set fileencoding=utf-8 :
 
 '''
-Functional tests for the yg.test.postgres module.
+Functional tests for the jaraco.postgres module.
 
 Intended to be run using py.test.
 '''
@@ -13,7 +13,7 @@ import unittest  # We use unittest just for its helpful assertXxxx() methods.
 
 import psycopg2
 
-from yg.test import postgres as pgtools
+import jaraco.postgres as pgtools
 
 
 # What's an unused, available port number that we can use for testing?
