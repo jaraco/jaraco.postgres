@@ -398,7 +398,9 @@ class PostgresServer(object):
 			else:
 				votes = 0
 
-		if votes > 0:
+		is_running = votes > 0
+
+		if is_running:
 			# postgres now talks to pg_ctl, but it might not yet be listening
 			# for connections from psql.  We don't want to claim that postgres
 			# is up until psql is able to connect.  (It occasionally takes
@@ -419,7 +421,7 @@ class PostgresServer(object):
 				tmpl = 'The %s is supposedly up, but "%s" cannot connect'
 				raise RuntimeError(tmpl % (self, ' '.join(cmd)))
 
-		return votes > 0
+		return is_running
 
 	@property
 	def pid(self):
