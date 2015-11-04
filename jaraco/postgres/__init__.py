@@ -379,6 +379,12 @@ class PostgresServer(object):
 		and declares a decision only after <tries> consecutive measurements
 		agree.
 		"""
+		return self._is_running(tries) and (self._assert_ready() or True)
+
+	def _is_running(self, tries=10):
+		"""
+		Return if the server is running according to pg_ctl.
+		"""
 		# We can't possibly be running if our base_pathname isn't defined.
 		if not self.base_pathname:
 			return False
@@ -398,9 +404,7 @@ class PostgresServer(object):
 			else:
 				votes = 0
 
-		is_running = votes > 0
-
-		return is_running and (self._assert_ready() or True)
+		return votes > 0
 
 	def _assert_ready(self):
 		if self.ready():
