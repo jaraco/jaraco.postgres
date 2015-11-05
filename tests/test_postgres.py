@@ -1,3 +1,4 @@
+import io
 import os
 from unittest import TestCase
 
@@ -20,6 +21,24 @@ class PostgresServerTest(TestCase):
 
             self.assertGreater(len(version), 0)
             self.assertGreaterEqual(version[0], 8)
+        finally:
+            server.destroy()
+
+    def test_serves_postgres_with_locale(self):
+        port = portend.find_available_local_port()
+        server = PostgresServer(HOST, port)
+        locale = 'C'
+        server.initdb(locale=locale)
+
+        try:
+            server.start()
+            server.get_version()  # To check we're able to talk to it.
+
+            config = os.path.join(server.base_pathname, 'postgresql.conf')
+            with io.open(config, encoding='utf-8') as f:
+                for line in f:
+                    if 'lc_messages =' in line:
+                        self.assertIn(locale, line)
         finally:
             server.destroy()
 

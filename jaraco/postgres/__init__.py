@@ -310,7 +310,7 @@ class PostgresServer(object):
                     raise
                 time.sleep(0.2)
 
-    def initdb(self, quiet=True):
+    def initdb(self, quiet=True, locale=None):
         """Bootstrap this DBMS from nothing.
 
         If you're running in an environment where the DBMS is provided as part
@@ -328,12 +328,13 @@ class PostgresServer(object):
             os.mkdir(self.base_pathname)
         stdout = DEV_NULL if quiet else None
         # The database superuser needs no password at this point(!).
-        cmd = [
-            INITDB,
+        arguments = [
             '--auth=trust',
             '--username', self.superuser,
-            '--pgdata', self.base_pathname,
         ]
+        if locale is not None:
+            arguments.extend(('--locale', locale))
+        cmd = [INITDB] + arguments + ['--pgdata', self.base_pathname]
         subprocess.check_call(cmd, stdout=stdout)
 
     @property
