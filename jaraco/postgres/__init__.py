@@ -137,14 +137,6 @@ class PostgresDatabase(object):
         Beware that this method is open to SQL injection attack.  Don't use
         unvetted values of self.user.
         """
-        #statement = '''DO $$
-        #BEGIN
-        #IF (SELECT count(*) FROM pg_user WHERE usename = '%s') = 0 THEN
-        #create user %s;
-        #END IF;
-        #END;
-        #$$ language plpgsql;''' % (self.user, self.user)
-        #self.super_psql(['-f', '-'])  XXX Need to set up a pipe to STDIN, like .create() does
         self.super_psql(['-c', "CREATE USER %s" % self.user])
 
     def drop(self):
@@ -470,7 +462,8 @@ class PostgresServer(object):
         you probably want to skip this step!
         """
         if not self.base_pathname:
-            tmpl = 'Invalid base_pathname: %r.  Did you forget to call .initdb()?'
+            tmpl = ('Invalid base_pathname: %r.  Did you forget to call '
+                    '.initdb()?')
             raise NotInitializedError(tmpl % self.base_pathname)
 
         conf_file = os.path.join(self.base_pathname, 'postgresql.conf')
@@ -503,7 +496,8 @@ class PostgresServer(object):
         # Postgres may launch, then abort if it's unhappy with some parameter.
         # This post-launch test helps us decide.
         if not self.is_running():
-            tmpl = '%s aborted immediately after launch, check postgresql.log in storage dir'
+            tmpl = ('%s aborted immediately after launch, check '
+                    'postgresql.log in storage dir')
             raise RuntimeError(tmpl % self)
 
     def stop(self):

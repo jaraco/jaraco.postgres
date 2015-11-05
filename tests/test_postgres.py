@@ -35,7 +35,8 @@ class PostgresDatabaseTest(TestCase):
         self.server.destroy()
 
     def test_creates_user_and_database(self):
-        database = PostgresDatabase('tests', user='john', host=HOST, port=self.port)
+        database = PostgresDatabase(
+            'tests', user='john', host=HOST, port=self.port)
 
         database.create_user()
         database.create()
