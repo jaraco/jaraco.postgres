@@ -30,6 +30,7 @@ CalledProcessError or RuntimeError.  This should be made consistent.
 from __future__ import absolute_import, print_function
 
 import glob
+import logging
 import os
 import shutil
 import signal
@@ -42,7 +43,10 @@ import re
 
 from jaraco.services import paths
 
+
 DEV_NULL = open(os.path.devnull, 'r+')
+
+log = logging.getLogger('jaraco.postgres')
 
 
 class NotInitializedError(Exception):
@@ -335,6 +339,9 @@ class PostgresServer(object):
         if locale is not None:
             arguments.extend(('--locale', locale))
         cmd = [INITDB] + arguments + ['--pgdata', self.base_pathname]
+        log.info('Initializing PostgreSQL with command: {}'.format(
+            ' '.join(cmd)
+        ))
         subprocess.check_call(cmd, stdout=stdout)
 
     @property
@@ -462,6 +469,7 @@ class PostgresServer(object):
         where the DBMS is provided as part of the basic infrastructure,
         you probably want to skip this step!
         """
+        log.info('Starting PostgreSQL at %s:%s', self.host, self.port)
         if not self.base_pathname:
             tmpl = ('Invalid base_pathname: %r.  Did you forget to call '
                     '.initdb()?')
@@ -506,6 +514,7 @@ class PostgresServer(object):
 
         Don't return until it's terminated.
         """
+        log.info('Stopping PostgreSQL at %s:%s', self.host, self.port)
         if self._is_running():
             cmd = [
                 PG_CTL,
