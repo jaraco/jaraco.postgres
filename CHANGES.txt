@@ -3,6 +3,13 @@
 
 Add ``postgresql_instance`` fixture.
 
+1.2
+===
+
+Added some logging info to initdb, start, stop.
+
+Substantial improvements for test suite.
+
 1.1
 ===
 
