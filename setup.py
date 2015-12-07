@@ -28,6 +28,7 @@ setup_params = dict(
     namespace_packages=['jaraco'],
     install_requires=[
         'jaraco.services',
+        'portend',
     ],
     setup_requires=[
         'setuptools_scm',
@@ -44,6 +45,9 @@ setup_params = dict(
         "Programming Language :: Python :: 3",
     ],
     entry_points={
+        'pytest11': [
+            'PostgreSQL = jaraco.postgres.fixtures',
+        ],
     },
 )
 if __name__ == '__main__':
