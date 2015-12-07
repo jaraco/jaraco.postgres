@@ -9,7 +9,7 @@ def postgresql_instance():
 	try:
 		port = portend.find_available_local_port()
 		instance = PostgresServer(port=port)
-		instance.init_db()
+		instance.initdb()
 		instance.start()
 		yield instance
 	except Exception as err:
