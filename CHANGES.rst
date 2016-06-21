@@ -1,3 +1,9 @@
+1.5
+===
+
+Project is now released automatically through Travis
+Continuous Integration.
+
 1.4
 ===
 
