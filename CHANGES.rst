@@ -4,6 +4,8 @@
 Project is now released automatically through Travis
 Continuous Integration.
 
+Add Trove classifier for Pytest Framework.
+
 1.4
 ===
 
