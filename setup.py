@@ -53,9 +53,9 @@ setup_params = dict(
 		"Framework :: Pytest",
 	],
 	entry_points={
-        'pytest11': [
-            'PostgreSQL = jaraco.postgres.fixtures',
-        ],
+		'pytest11': [
+			'PostgreSQL = jaraco.postgres.fixtures',
+		],
 	},
 )
 if __name__ == '__main__':
