@@ -530,6 +530,16 @@ class PostgresServer(object):
         while self._is_running():
             time.sleep(0.1)
 
+    def create(self, db_name, **kwargs):
+        """
+        Construct a PostgresDatabase and create it on self
+        """
+        db = PostgresDatabase(db_name, host=self.host, port=self.port,
+            superuser=self.superuser, **kwargs)
+        db.create_user()
+        db.create()
+        return db
+
 
 class PostgresFinder(paths.PathFinder):
     # Where are the postgres executables?  Consider the following pathnames in

@@ -1,3 +1,8 @@
+1.6
+===
+
+Add ``.create`` convenience method to PostgresServer.
+
 1.5
 ===
 
