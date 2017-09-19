@@ -314,7 +314,7 @@ class PostgresServer(object):
                     raise
                 time.sleep(0.2)
 
-    def initdb(self, quiet=True, locale=None):
+    def initdb(self, quiet=True, locale='en_US.UTF-8'):
         """Bootstrap this DBMS from nothing.
 
         If you're running in an environment where the DBMS is provided as part
