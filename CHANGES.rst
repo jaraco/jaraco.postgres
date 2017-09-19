@@ -1,3 +1,12 @@
+2.0
+===
+
+PostgresServer now creates all databases with a default
+locale of ``en_US.UTF-8``. Now, databases will be
+Unicode-capable by default. To restore the original
+behavior, deferring to the system locale, pass
+``locale=None`` to ``initdb``.
+
 1.6
 ===
 
