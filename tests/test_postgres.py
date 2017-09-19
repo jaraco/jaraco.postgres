@@ -44,10 +44,9 @@ class PostgresServerTest(TestCase):
             server.get_version()  # To check we're able to talk to it.
 
             config = os.path.join(server.base_pathname, 'postgresql.conf')
-            with io.open(config, encoding='utf-8') as f:
-                for line in f:
-                    if 'lc_messages =' in line:
-                        self.assertIn(locale, line)
+            with io.open(config, encoding='utf-8') as strm:
+                expect = "lc_messages = 'C'"
+                assert any(expect in line for line in strm)
         finally:
             server.destroy()
 
