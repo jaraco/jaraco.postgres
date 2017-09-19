@@ -42,9 +42,6 @@ params = dict(
 			'pytest-sugar',
 			'collective.checkdocs',
 			'psycopg2',
-			'pytest-flakes==1.0.1',
-			'pytest-cov==2.2.0',
-			'pytest-pep8==1.0.6',
 		],
 		'docs': [
 			'sphinx',
