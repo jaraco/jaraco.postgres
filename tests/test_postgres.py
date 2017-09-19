@@ -49,6 +49,20 @@ class TestPostgresServer:
         finally:
             server.destroy()
 
+    def test_unicode_value(self, monkeypatch):
+        port = portend.find_available_local_port()
+        monkeypatch.setitem(os.environ, 'LANG', 'C')
+        server = PostgresServer(HOST, port)
+        server.initdb()
+        try:
+            server.start()
+            server.get_version()
+            db = server.create('test_unicode')
+            db.sql('CREATE TABLE records(name varchar(80))')
+            db.sql("INSERT INTO records (name) VALUES (U&'\\2609')")
+        finally:
+            server.destroy()
+
 
 class TestPostgresDatabase:
     def setup(self):
