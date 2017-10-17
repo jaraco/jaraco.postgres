@@ -6,6 +6,9 @@
 .. image:: https://img.shields.io/travis/jaraco/jaraco.postgres/master.svg
    :target: http://travis-ci.org/jaraco/jaraco.postgres
 
+.. image:: https://readthedocs.org/projects/jaracopostgres/badge/?version=latest
+   :target: http://jaracopostgres.readthedocs.io/en/latest/?badge=latest
+
 Routines and fixtures for launching and managing
 `PostgreSQL <https://postgresql.org>`_ instances.
 
