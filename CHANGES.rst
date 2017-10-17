@@ -1,3 +1,8 @@
+2.0.1
+=====
+
+#1: Fix version detection on Postgres 10.0.
+
 2.0
 ===
 
