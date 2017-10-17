@@ -7,11 +7,15 @@ Welcome to jaraco.postgres documentation!
    history
 
 
-.. automodule:: jaraco.postgres
+.. automodule:: jaraco.postgres.__init__
     :members:
     :undoc-members:
     :show-inheritance:
 
+.. automodule:: jaraco.postgres.fixtures
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 Indices and tables
 ==================
