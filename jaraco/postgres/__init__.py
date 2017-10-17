@@ -52,6 +52,7 @@ log = logging.getLogger('jaraco.postgres')
 class NotInitializedError(Exception):
     "An exception raised when an uninitialized DBMS is asked to do something"
 
+
 class PostgresDatabase(object):
     '''
     Typical usage:
@@ -96,8 +97,10 @@ class PostgresDatabase(object):
             'user=%s, host=%s, port=%s, '
             'superuser=%s, template=%s)'
         )
-        return tmpl % (self.db_name, self.user, self.host,
-            self.port, self.superuser, self.template)
+        return tmpl % (
+            self.db_name, self.user, self.host,
+            self.port, self.superuser, self.template
+        )
 
     __str__ = __repr__
 
@@ -114,7 +117,8 @@ class PostgresDatabase(object):
         create_sql = 'CREATE DATABASE {self.db_name} WITH OWNER {self.user}'
         create_sql = create_sql.format(**vars())
         self.super_psql(['-c', create_sql])
-        if sql: self.psql_string(sql)
+        if sql:
+            self.psql_string(sql)
 
     def psql_string(self, sql):
         """
@@ -217,7 +221,8 @@ class PostgresDatabase(object):
         """
         psycopg2 = importlib.import_module('psycopg2')
         importlib.import_module('psycopg2.extensions')
-        connection = psycopg2.connect(user=self.user, host=self.host,
+        connection = psycopg2.connect(
+            user=self.user, host=self.host,
             port=self.port, database=self.db_name)
         connection.set_isolation_level(
             psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
@@ -247,7 +252,8 @@ class PostgresDatabase(object):
 
 
 class PostgresServer(object):
-    def __init__(self, host='localhost', port=5432, base_pathname=None,
+    def __init__(
+            self, host='localhost', port=5432, base_pathname=None,
             superuser='postgres'):
         """This class represents a DBMS server.
 
@@ -429,7 +435,8 @@ class PostgresServer(object):
         """
         cmd = self._psql_cmd()
         for i in range(50, -1, -1):
-            res = subprocess.call(cmd, stdin=DEV_NULL, stdout=DEV_NULL,
+            res = subprocess.call(
+                cmd, stdin=DEV_NULL, stdout=DEV_NULL,
                 stderr=DEV_NULL)
             if res == 0:
                 break
@@ -534,7 +541,8 @@ class PostgresServer(object):
         """
         Construct a PostgresDatabase and create it on self
         """
-        db = PostgresDatabase(db_name, host=self.host, port=self.port,
+        db = PostgresDatabase(
+            db_name, host=self.host, port=self.port,
             superuser=self.superuser, **kwargs)
         db.create_user()
         db.create()
@@ -567,6 +575,7 @@ class PostgresFinder(paths.PathFinder):
 
     exe = 'pg_ctl'
     args = ['--version']
+
 
 root = PostgresFinder.find_root()
 INITDB = root / 'initdb'
