@@ -1,3 +1,16 @@
+3.0
+===
+
+Removed global variables and behavior on import:
+
+- root
+- INITDB
+- PG_CTL
+- PSQL
+- POSTGRES
+
+Instead, use ``PostgresFinder.find_root()``.
+
 2.0.1
 =====
 
