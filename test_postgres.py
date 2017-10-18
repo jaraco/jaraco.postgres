@@ -299,12 +299,14 @@ class Test_PostgresServer(unittest.TestCase):
     def test_start_port_out_of_range(self):
         self.dbms = pgtools.PostgresServer(port=99999999)
         self.dbms.initdb()
-        self.assertRaises(CalledProcessError, self.dbms.start)
+        errors = CalledProcessError, RuntimeError
+        self.assertRaises(errors, self.dbms.start)
 
     def test_start_port_value_error(self):
         self.dbms = pgtools.PostgresServer(port='BOGUS')
         self.dbms.initdb()
-        self.assertRaises(CalledProcessError, self.dbms.start)
+        errors = CalledProcessError, RuntimeError
+        self.assertRaises(errors, self.dbms.start)
 
     def test_start_ok(self):
         self.dbms = pgtools.PostgresServer(port=UNUSED_PORT)
