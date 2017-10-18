@@ -125,7 +125,7 @@ class PostgresDatabase(object):
         Evaluate the sql file (possibly multiple statements) using psql.
         """
         argv = [
-            PSQL,
+            PostgresFinder.find_root() / 'psql',
             '--quiet',
             '-U', self.user,
             '-h', self.host,
@@ -176,8 +176,13 @@ class PostgresDatabase(object):
         @return: None. Raises an exception upon error, but *ignores SQL
         errors* unless "\set ON_ERROR_STOP TRUE" is used.
         """
-        argv = [PSQL, '--quiet', '-U', self.user, '-h', self.host, '-p',
-                self.port] + args + [self.db_name]
+        argv = [
+            PostgresFinder.find_root() / 'psql',
+            '--quiet',
+            '-U', self.user,
+            '-h', self.host,
+            '-p', self.port,
+        ] + args + [self.db_name]
         subprocess.check_call(argv)
 
     def sql(self, input_string, *args):
@@ -242,7 +247,7 @@ class PostgresDatabase(object):
         (and we connect to the superuser's database, not the user's database).
         """
         argv = [
-            PSQL,
+            PostgresFinder.find_root() / 'psql',
             '--quiet',
             '-U', self.superuser,
             '-h', self.host,
@@ -344,7 +349,9 @@ class PostgresServer(object):
         ]
         if locale is not None:
             arguments.extend(('--locale', locale))
-        cmd = [INITDB] + arguments + ['--pgdata', self.base_pathname]
+        cmd = [
+            PostgresFinder.find_root() / 'initdb',
+        ] + arguments + ['--pgdata', self.base_pathname]
         log.info('Initializing PostgreSQL with command: {}'.format(
             ' '.join(cmd)
         ))
@@ -359,7 +366,7 @@ class PostgresServer(object):
         tmpl = "select setting from pg_settings where name='{name}';"
         query = tmpl.format(**locals())
         cmd = [
-            PSQL,
+            PostgresFinder.find_root() / 'psql',
             '-p', self.port,
             'postgres',
             '-c', query,
@@ -398,7 +405,12 @@ class PostgresServer(object):
         if tries < 1:
             raise ValueError('tries must be > 0')
 
-        cmd = [PG_CTL, 'status', '-D', self.base_pathname]
+        cmd = [
+            PostgresFinder.find_root() / 'pg_ctl',
+            'status',
+            '-D',
+            self.base_pathname,
+        ]
         votes = 0
         while abs(votes) < tries:
             time.sleep(0.1)
@@ -421,7 +433,7 @@ class PostgresServer(object):
 
     def _psql_cmd(self):
         return [
-            PSQL,
+            PostgresFinder.find_root() / 'psql',
             '-h', self.host,
             '-p', self.port,
             '-U', self.superuser,
@@ -459,8 +471,8 @@ class PostgresServer(object):
     @staticmethod
     def get_version():
         """Returns the Postgres version in tuple form, e.g: (9, 1)"""
-        results = subprocess.check_output([PG_CTL, '--version']).decode(
-            'utf-8')
+        cmd = [PostgresFinder.find_root() / 'pg_ctl', '--version']
+        results = subprocess.check_output(cmd).decode('utf-8')
         match = re.search(r'(\d+\.\d+(\.\d+)?)', results)
         if match:
             ver_string = match.group(0)
@@ -503,7 +515,8 @@ class PostgresServer(object):
                 '-p', self.port,
             ]
             subprocess.check_call([
-                PG_CTL, 'start',
+                PostgresFinder.find_root() / 'pg_ctl',
+                'start',
                 '-D', self.base_pathname,
                 '-l', os.path.join(self.base_pathname, 'postgresql.log'),
                 '-o', subprocess.list2cmdline(postgres_options),
@@ -524,7 +537,7 @@ class PostgresServer(object):
         log.info('Stopping PostgreSQL at %s:%s', self.host, self.port)
         if self._is_running():
             cmd = [
-                PG_CTL,
+                PostgresFinder.find_root() / 'pg_ctl',
                 'stop',
                 '-D', self.base_pathname,
                 '-m', 'fast',
@@ -575,10 +588,3 @@ class PostgresFinder(paths.PathFinder):
 
     exe = 'pg_ctl'
     args = ['--version']
-
-
-root = PostgresFinder.find_root()
-INITDB = root / 'initdb'
-PG_CTL = root / 'pg_ctl'
-PSQL = root / 'psql'
-POSTGRES = root / 'postgres'

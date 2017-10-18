@@ -7,7 +7,7 @@ Welcome to jaraco.postgres documentation!
    history
 
 
-.. automodule:: jaraco.postgres.__init__
+.. automodule:: jaraco.postgres
     :members:
     :undoc-members:
     :show-inheritance:
