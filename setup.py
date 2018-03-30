@@ -35,6 +35,7 @@ params = dict(
 	install_requires=[
 		'jaraco.services',
 		'portend',
+		'packaging',
 	],
 	extras_require={
 		'testing': [

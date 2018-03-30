@@ -41,6 +41,7 @@ import importlib
 import itertools
 import re
 
+import packaging.version
 from jaraco.services import paths
 
 
@@ -571,9 +572,15 @@ class PostgresFinder(paths.PathFinder):
         '/usr/local/pgsql/bin/',
         '/Program Files/pgsql/bin',
     ]
+
+    def _get_version_from_path(path):
+        version_str = re.search(r'\d+(\.\d+)?', path).group(0)
+        return packaging.version.Version(version_str)
+
     # Prefer the highest-numbered version available.
     heuristic_paths.extend(
-        sorted(glob.glob('/usr/lib/postgresql/*/bin'), reverse=True)
+        sorted(glob.glob('/usr/lib/postgresql/*/bin'),
+               reverse=True, key=_get_version_from_path)
     )
 
     # allow the environment to stipulate where Postgres must
