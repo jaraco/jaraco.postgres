@@ -1,4 +1,3 @@
-import logging
 import io
 import os
 
@@ -7,16 +6,6 @@ from jaraco.postgres import PostgresDatabase, PostgresServer
 
 
 HOST = os.environ.get('HOST', 'localhost')
-
-
-def __setup_logging():
-    root = logging.getLogger()
-    root.setLevel(logging.DEBUG)
-    handler = logging.StreamHandler()
-    root.addHandler(handler)
-
-
-__setup_logging()
 
 
 class TestPostgresServer:
