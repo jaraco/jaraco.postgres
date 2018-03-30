@@ -1,3 +1,9 @@
+3.0.1
+=====
+
+#2: When searching heuristic paths, sort parsed version numbers
+numerically so that 10 is greater than 9.
+
 3.0
 ===
 
