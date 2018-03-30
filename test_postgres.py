@@ -11,10 +11,10 @@ from __future__ import unicode_literals
 import os
 import shutil
 from subprocess import CalledProcessError
-import unittest  # We use unittest just for its helpful assertXxxx() methods.
 
 import psycopg2
 import portend
+import pytest
 
 import jaraco.postgres as pgtools
 
@@ -22,34 +22,22 @@ import jaraco.postgres as pgtools
 UNUSED_PORT = portend.find_available_local_port()
 
 
-class Test_PostgresDatabase(unittest.TestCase):
-    @classmethod
-    def setup_class(cls):
-        """Automatically called by py.test to set up this class for testing.
-        """
-        cls.dbms = None
+class Test_PostgresDatabase:
+    @pytest.fixture(scope='class', autouse=True)
+    def dbms(self, request):
+        cls = request.cls
         cls.port = UNUSED_PORT
         cls.dbms = pgtools.PostgresServer(port=cls.port)
         cls.dbms.initdb()
         cls.dbms.start()
+        yield
+        cls.dbms.destroy()
+        del cls.dbms
 
-    @classmethod
-    def teardown_class(cls):
-        """Automatically called to undo the effect of .setup_class().
-        """
-        if cls.dbms:
-            cls.dbms.destroy()
-            cls.dbms = None
-
-    def setUp(self):
-        """Automatically called by py.test once per test method.
-        """
-        self.database = None
-
-    def tearDown(self):
-        """Automatically called to undo the effect of .setUp().
-        """
-        if self.database:
+    @pytest.fixture(scope='function', autouse=True)
+    def cleanup_database(self):
+        yield
+        if hasattr(self, 'database'):
             self.database.drop_if_exists()
             self.database.drop_user()
 
@@ -89,28 +77,29 @@ class Test_PostgresDatabase(unittest.TestCase):
             db_name='test_pgtools',
             user='pmxtest', host='localhost', port=self.port,
             superuser='postgres', template='template1')
-        self.assertEqual(
-            repr(self.database),
+        assert repr(self.database) == (
             'PostgresDatabase(db_name=test_pgtools, user=pmxtest, '
             'host=localhost,'
-            ' port=%s, superuser=postgres, template=template1)' % self.port)
+            ' port=%s, superuser=postgres, template=template1)' % self.port
+        )
 
     def test___str__(self):
         self.database = pgtools.PostgresDatabase(
             db_name='test_pgtools',
             user='pmxtest', host='localhost', port=self.port,
             superuser='postgres', template='template1')
-        self.assertEqual(
-            str(self.database),
+        assert str(self.database) == (
             'PostgresDatabase(db_name=test_pgtools, user=pmxtest, '
             'host=localhost,'
-            ' port=%s, superuser=postgres, template=template1)' % self.port)
+            ' port=%s, superuser=postgres, template=template1)' % self.port
+        )
 
     def test_create_fails_when_user_nonexistent(self):
         self.database = pgtools.PostgresDatabase(
             db_name='test_pgtools',
             port=self.port, user='no_such_user')
-        self.assertRaises(CalledProcessError, self.database.create)
+        with pytest.raises(CalledProcessError):
+            self.database.create()
 
     def test_create_ok_when_no_sql(self):
         self.database = pgtools.PostgresDatabase(
@@ -149,8 +138,8 @@ class Test_PostgresDatabase(unittest.TestCase):
         self.database.create()
         self.database.drop()
         # Can't select; the database is gone!
-        self.assertRaises(
-            psycopg2.OperationalError, self.database.sql, 'SELECT 1')
+        with pytest.raises(psycopg2.OperationalError):
+            self.database.sql('SELECT 1')
 
     def test_drop_is_idempotent(self):
         self.database = pgtools.PostgresDatabase(
@@ -175,8 +164,8 @@ class Test_PostgresDatabase(unittest.TestCase):
             port=self.port)
         self.database.create_user()
         self.database.create()
-        self.assertRaises(
-            CalledProcessError, self.database.psql, ['-c', 'bogus'])
+        with pytest.raises(CalledProcessError):
+            self.database.psql(['-c', 'bogus'])
 
     def test_psql_ok_when_sql_is_valid(self):
         self.database = pgtools.PostgresDatabase(
@@ -192,8 +181,10 @@ class Test_PostgresDatabase(unittest.TestCase):
             port=self.port)
         self.database.create_user()
         self.database.create()
-        self.assertRaises(TypeError, self.database.sql, 3.14)
-        self.assertRaises(psycopg2.ProgrammingError, self.database.sql, [])
+        with pytest.raises(TypeError):
+            self.database.sql(3.14)
+        with pytest.raises(psycopg2.ProgrammingError):
+            self.database.sql([])
 
     def test_sql_ok_when_sql_is_valid(self):
         self.database = pgtools.PostgresDatabase(
@@ -201,9 +192,8 @@ class Test_PostgresDatabase(unittest.TestCase):
             port=self.port)
         self.database.create_user()
         self.database.create()
-        self.assertEqual(self.database.sql('SELECT 1'), [(1,)])
-        self.assertEqual(
-            self.database.sql("SELECT 'hello', 2"), [('hello', 2)])
+        assert self.database.sql('SELECT 1') == [(1,)]
+        assert self.database.sql("SELECT 'hello', 2") == [('hello', 2)]
 
     def test_super_psql_detects_bogus_params(self):
         self.database = pgtools.PostgresDatabase(
@@ -218,8 +208,8 @@ class Test_PostgresDatabase(unittest.TestCase):
             port=self.port)
         self.database.create_user()
         self.database.create()
-        self.assertRaises(
-            CalledProcessError, self.database.super_psql, ['-c', 'bogus'])
+        with pytest.raises(CalledProcessError):
+            self.database.super_psql(['-c', 'bogus'])
 
     def test_super_psql_ok_when_sql_is_valid(self):
         self.database = pgtools.PostgresDatabase(
@@ -230,33 +220,31 @@ class Test_PostgresDatabase(unittest.TestCase):
         self.database.super_psql(['-c', 'SELECT 1'])
 
 
-class Test_PostgresServer(unittest.TestCase):
+class Test_PostgresServer:
 
-    def setUp(self):
-        self.dbms = None
-
-    def tearDown(self):
-        if self.dbms:
+    @pytest.fixture(autouse=True)
+    def cleanup_dbms(self):
+        if hasattr(self, 'dbms'):
             self.dbms.destroy()
-            self.dbms = None
+            del self.dbms
 
     def test___init__ok(self):
         self.dbms = pgtools.PostgresServer(host='localhost', port=UNUSED_PORT)
 
     def test___repr__(self):
         self.dbms = pgtools.PostgresServer(host='localhost', port=UNUSED_PORT)
-        self.assertEqual(
-            repr(self.dbms),
+        assert repr(self.dbms) == (
             'PostgresServer(host=localhost, port=%s, '
             'base_pathname=%s, superuser=%s)'
-            % (self.dbms.port, self.dbms.base_pathname, self.dbms.superuser))
+            % (self.dbms.port, self.dbms.base_pathname, self.dbms.superuser)
+        )
 
     def test___str__(self):
         self.dbms = pgtools.PostgresServer(host='localhost', port=UNUSED_PORT)
-        self.assertEqual(
-            str(self.dbms),
+        assert str(self.dbms) == (
             'PostgreSQL server at %s:%s (with storage at %s)' %
-            (self.dbms.host, self.dbms.port, self.dbms.base_pathname))
+            (self.dbms.host, self.dbms.port, self.dbms.base_pathname)
+        )
 
     def test_destroy_handles_deleted_directory(self):
         self.dbms = pgtools.PostgresServer(host='localhost', port=UNUSED_PORT)
@@ -283,7 +271,8 @@ class Test_PostgresServer(unittest.TestCase):
     def test_initdb_base_pathname_bogus(self):
         self.dbms = pgtools.PostgresServer(
             port=UNUSED_PORT, base_pathname='/n&^fX:d#f9')
-        self.assertRaises((OSError, IOError), self.dbms.initdb)
+        with pytest.raises((OSError, IOError)):
+            self.dbms.initdb()
 
     def test_initdb_ok(self):
         self.dbms = pgtools.PostgresServer(port=UNUSED_PORT)
@@ -291,20 +280,23 @@ class Test_PostgresServer(unittest.TestCase):
 
     def test_is_running(self):
         self.dbms = pgtools.PostgresServer(port=UNUSED_PORT)
-        self.assertEqual(self.dbms.is_running(), False)
+        assert self.dbms.is_running() is False
         self.dbms.initdb()
-        self.assertEqual(self.dbms.is_running(), False)
+        assert self.dbms.is_running() is False
         self.dbms.start()
-        self.assertEqual(self.dbms.is_running(), True)
+        assert self.dbms.is_running() is True
         self.dbms.stop()
-        self.assertEqual(self.dbms.is_running(), False)
+        assert self.dbms.is_running() is False
 
     def test_is_running_tries_bogus(self):
         self.dbms = pgtools.PostgresServer(port=UNUSED_PORT)
         self.dbms.initdb()
-        self.assertRaises(ValueError, self.dbms.is_running, -1)
-        self.assertRaises(ValueError, self.dbms.is_running, -10)
-        self.assertRaises(ValueError, self.dbms.is_running, 0)
+        with pytest.raises(ValueError):
+            self.dbms.is_running(-1)
+        with pytest.raises(ValueError):
+            self.dbms.is_running(-10)
+        with pytest.raises(ValueError):
+            self.dbms.is_running(0)
 
     def test_pid(self):
         self.dbms = pgtools.PostgresServer(port=UNUSED_PORT)
@@ -315,46 +307,51 @@ class Test_PostgresServer(unittest.TestCase):
         # Weak test -- just check to see whether such a process exists.
         os.kill(pid, 0)
         self.dbms.stop()
-        self.assertRaises(OSError, os.kill, pid, 0)
+        with pytest.raises(OSError):
+            os.kill(pid, 0)
 
     def test_pid_returns_None_when_not_running(self):
         self.dbms = pgtools.PostgresServer(port=UNUSED_PORT)
-        self.assertEqual(self.dbms.pid, None)
+        assert self.dbms.pid is None
         self.dbms.initdb()
-        self.assertEqual(self.dbms.pid, None)
+        assert self.dbms.pid is None
         self.dbms.start()
-        self.assertNotEqual(self.dbms.pid, None)
+        assert self.dbms.pid is not None
         os.kill(self.dbms.pid, 0)
         self.dbms.stop()
-        self.assertEqual(self.dbms.pid, None)
+        assert self.dbms.pid is None
 
     def test_start_host_bogus(self):
         # Hostnames aren't checked until the postgres server starts up
         self.dbms = pgtools.PostgresServer(host='no.such.host.exists')
         self.dbms.initdb()
-        self.assertRaises(RuntimeError, self.dbms.start)
+        with pytest.raises(RuntimeError):
+            self.dbms.start()
 
     def test_start_port_out_of_range(self):
         self.dbms = pgtools.PostgresServer(port=99999999)
         self.dbms.initdb()
         errors = CalledProcessError, RuntimeError
-        self.assertRaises(errors, self.dbms.start)
+        with pytest.raises(errors):
+            self.dbms.start()
 
     def test_start_port_value_error(self):
         self.dbms = pgtools.PostgresServer(port='BOGUS')
         self.dbms.initdb()
         errors = CalledProcessError, RuntimeError
-        self.assertRaises(errors, self.dbms.start)
+        with pytest.raises(errors):
+            self.dbms.start()
 
     def test_start_ok(self):
         self.dbms = pgtools.PostgresServer(port=UNUSED_PORT)
         self.dbms.initdb()
         self.dbms.start()
-        self.assertEqual(self.dbms.is_running(), True)
+        assert self.dbms.is_running() is True
 
     def test_start_raises_NotInitializedError_when_uninitialized(self):
         self.dbms = pgtools.PostgresServer(port=UNUSED_PORT)
-        self.assertRaises(pgtools.NotInitializedError, self.dbms.start)
+        with pytest.raises(pgtools.NotInitializedError):
+            self.dbms.start()
 
     def test_stop_is_idempotent(self):
         self.dbms = pgtools.PostgresServer(port=UNUSED_PORT)
@@ -363,11 +360,11 @@ class Test_PostgresServer(unittest.TestCase):
         self.dbms.stop()
         self.dbms.stop()
         self.dbms.stop()
-        self.assertEqual(self.dbms.is_running(), False)
+        assert self.dbms.is_running() is False
 
     def test_stop_ok(self):
         self.dbms = pgtools.PostgresServer(port=UNUSED_PORT)
         self.dbms.initdb()
         self.dbms.start()
         self.dbms.stop()
-        self.assertEqual(self.dbms.is_running(), False)
+        assert self.dbms.is_running() is False
