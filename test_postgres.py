@@ -55,9 +55,11 @@ class Test_PostgresDatabase(unittest.TestCase):
         database_1 = None
         database_2 = None
         try:
-            database_1 = pgtools.PostgresDatabase(db_name='test_pgtools_1',
+            database_1 = pgtools.PostgresDatabase(
+                db_name='test_pgtools_1',
                 port=self.port)
-            database_2 = pgtools.PostgresDatabase(db_name='test_pgtools_2',
+            database_2 = pgtools.PostgresDatabase(
+                db_name='test_pgtools_2',
                 port=self.port)
         finally:
             if database_1:
@@ -66,73 +68,91 @@ class Test_PostgresDatabase(unittest.TestCase):
                 database_2.drop_if_exists()
 
     def test___init__ok(self):
-        self.database = pgtools.PostgresDatabase(db_name='test_pgtools',
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
             port=self.port)
 
     def test___init__ok_when_port_integer(self):
-        self.database = pgtools.PostgresDatabase(db_name='test_pgtools',
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
             port=int(self.port))
 
     def test___init__ok_when_port_string(self):
-        self.database = pgtools.PostgresDatabase(db_name='test_pgtools',
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
             port=str(self.port))
 
     def test___repr__(self):
-        self.database = pgtools.PostgresDatabase(db_name='test_pgtools',
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
             user='pmxtest', host='localhost', port=self.port,
             superuser='postgres', template='template1')
-        self.assertEqual(repr(self.database),
-            'PostgresDatabase(db_name=test_pgtools, user=pmxtest, host=localhost,'
+        self.assertEqual(
+            repr(self.database),
+            'PostgresDatabase(db_name=test_pgtools, user=pmxtest, '
+            'host=localhost,'
             ' port=%s, superuser=postgres, template=template1)' % self.port)
 
     def test___str__(self):
-        self.database = pgtools.PostgresDatabase(db_name='test_pgtools',
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
             user='pmxtest', host='localhost', port=self.port,
             superuser='postgres', template='template1')
-        self.assertEqual(str(self.database),
-            'PostgresDatabase(db_name=test_pgtools, user=pmxtest, host=localhost,'
+        self.assertEqual(
+            str(self.database),
+            'PostgresDatabase(db_name=test_pgtools, user=pmxtest, '
+            'host=localhost,'
             ' port=%s, superuser=postgres, template=template1)' % self.port)
 
     def test_create_fails_when_user_nonexistent(self):
-        self.database = pgtools.PostgresDatabase(db_name='test_pgtools',
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
             port=self.port, user='no_such_user')
         self.assertRaises(CalledProcessError, self.database.create)
 
     def test_create_ok_when_no_sql(self):
-        self.database = pgtools.PostgresDatabase(db_name='test_pgtools',
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
             port=self.port)
         self.database.create_user()
         self.database.create()
 
     def test_create_ok_with_sql(self):
-        self.database = pgtools.PostgresDatabase(db_name='test_pgtools',
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
             port=self.port)
         self.database.create_user()
         self.database.create('CREATE TABLE test (value text)')
 
     def test_create_ok_with_sql_containing_unicode(self):
-        self.database = pgtools.PostgresDatabase(db_name='test_pgtools',
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
             port=self.port)
         self.database.create_user()
-        self.database.create(u'CREATE TABLE countries (value text) -- ¡México!')
+        self.database.create(
+            u'CREATE TABLE countries (value text) -- ¡México!')
 
     def test_create_ok_with_sql_using_psl_extensions(self):
-        self.database = pgtools.PostgresDatabase(db_name='test_pgtools',
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
             port=self.port)
         self.database.create_user()
         self.database.create('\set ON_ERROR_STOP FALSE\nSYNTAX ERROR HERE')
 
     def test_drop(self):
-        self.database = pgtools.PostgresDatabase(db_name='test_pgtools',
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
             port=self.port)
         self.database.create_user()
         self.database.create()
         self.database.drop()
         # Can't select; the database is gone!
-        self.assertRaises(psycopg2.OperationalError, self.database.sql, 'SELECT 1')
+        self.assertRaises(
+            psycopg2.OperationalError, self.database.sql, 'SELECT 1')
 
     def test_drop_is_idempotent(self):
-        self.database = pgtools.PostgresDatabase(db_name='test_pgtools',
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
             port=self.port)
         self.database.create_user()
         self.database.create()
@@ -141,27 +161,32 @@ class Test_PostgresDatabase(unittest.TestCase):
         self.database.drop()
 
     def test_psql_detects_bogus_params(self):
-        self.database = pgtools.PostgresDatabase(db_name='test_pgtools',
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
             port=self.port)
         self.database.create_user()
         self.database.create()
 
     def test_psql_detects_sql_error(self):
-        self.database = pgtools.PostgresDatabase(db_name='test_pgtools',
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
             port=self.port)
         self.database.create_user()
         self.database.create()
-        self.assertRaises(CalledProcessError, self.database.psql, ['-c', 'bogus'])
+        self.assertRaises(
+            CalledProcessError, self.database.psql, ['-c', 'bogus'])
 
     def test_psql_ok_when_sql_is_valid(self):
-        self.database = pgtools.PostgresDatabase(db_name='test_pgtools',
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
             port=self.port)
         self.database.create_user()
         self.database.create()
         self.database.psql(['-c', 'SELECT 1'])
 
     def test_sql_detects_bogus_params(self):
-        self.database = pgtools.PostgresDatabase(db_name='test_pgtools',
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
             port=self.port)
         self.database.create_user()
         self.database.create()
@@ -169,28 +194,34 @@ class Test_PostgresDatabase(unittest.TestCase):
         self.assertRaises(psycopg2.ProgrammingError, self.database.sql, [])
 
     def test_sql_ok_when_sql_is_valid(self):
-        self.database = pgtools.PostgresDatabase(db_name='test_pgtools',
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
             port=self.port)
         self.database.create_user()
         self.database.create()
         self.assertEqual(self.database.sql('SELECT 1'), [(1,)])
-        self.assertEqual(self.database.sql("SELECT 'hello', 2"), [('hello', 2)])
+        self.assertEqual(
+            self.database.sql("SELECT 'hello', 2"), [('hello', 2)])
 
     def test_super_psql_detects_bogus_params(self):
-        self.database = pgtools.PostgresDatabase(db_name='test_pgtools',
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
             port=self.port)
         self.database.create_user()
         self.database.create()
 
     def test_super_psql_detects_sql_error(self):
-        self.database = pgtools.PostgresDatabase(db_name='test_pgtools',
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
             port=self.port)
         self.database.create_user()
         self.database.create()
-        self.assertRaises(CalledProcessError, self.database.super_psql, ['-c', 'bogus'])
+        self.assertRaises(
+            CalledProcessError, self.database.super_psql, ['-c', 'bogus'])
 
     def test_super_psql_ok_when_sql_is_valid(self):
-        self.database = pgtools.PostgresDatabase(db_name='test_pgtools',
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
             port=self.port)
         self.database.create_user()
         self.database.create()
@@ -212,13 +243,16 @@ class Test_PostgresServer(unittest.TestCase):
 
     def test___repr__(self):
         self.dbms = pgtools.PostgresServer(host='localhost', port=UNUSED_PORT)
-        self.assertEqual(repr(self.dbms),
-            'PostgresServer(host=localhost, port=%s, base_pathname=%s, superuser=%s)'
+        self.assertEqual(
+            repr(self.dbms),
+            'PostgresServer(host=localhost, port=%s, '
+            'base_pathname=%s, superuser=%s)'
             % (self.dbms.port, self.dbms.base_pathname, self.dbms.superuser))
 
     def test___str__(self):
         self.dbms = pgtools.PostgresServer(host='localhost', port=UNUSED_PORT)
-        self.assertEqual(str(self.dbms),
+        self.assertEqual(
+            str(self.dbms),
             'PostgreSQL server at %s:%s (with storage at %s)' %
             (self.dbms.host, self.dbms.port, self.dbms.base_pathname))
 
@@ -226,7 +260,8 @@ class Test_PostgresServer(unittest.TestCase):
         self.dbms = pgtools.PostgresServer(host='localhost', port=UNUSED_PORT)
         self.dbms.initdb()
         # Reach under the covers and pre-emptively delete the directory.
-        # (But first, some checking to prevent hideously self-destructive acts.)
+        # (But first, some checking to prevent hideously
+        # self-destructive acts.)
         assert self.dbms.base_pathname is not None
         assert self.dbms.base_pathname is not ''
         assert self.dbms.base_pathname is not '.'
@@ -244,7 +279,8 @@ class Test_PostgresServer(unittest.TestCase):
         self.dbms.destroy()
 
     def test_initdb_base_pathname_bogus(self):
-        self.dbms = pgtools.PostgresServer(port=UNUSED_PORT, base_pathname='/n&^fX:d#f9')
+        self.dbms = pgtools.PostgresServer(
+            port=UNUSED_PORT, base_pathname='/n&^fX:d#f9')
         self.assertRaises((OSError, IOError), self.dbms.initdb)
 
     def test_initdb_ok(self):

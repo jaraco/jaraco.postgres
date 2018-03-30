@@ -14,6 +14,8 @@ def __setup_logging():
     root.setLevel(logging.DEBUG)
     handler = logging.StreamHandler()
     root.addHandler(handler)
+
+
 __setup_logging()
 
 
