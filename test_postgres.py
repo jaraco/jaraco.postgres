@@ -1,10 +1,12 @@
-# vim: set fileencoding=utf-8 :
+# coding: utf-8
 
 '''
 Functional tests for the jaraco.postgres module.
 
 Intended to be run using py.test.
 '''
+
+from __future__ import unicode_literals
 
 import os
 import shutil
@@ -130,7 +132,7 @@ class Test_PostgresDatabase(unittest.TestCase):
             port=self.port)
         self.database.create_user()
         self.database.create(
-            u'CREATE TABLE countries (value text) -- ¡México!')
+            'CREATE TABLE countries (value text) -- ¡México!')
 
     def test_create_ok_with_sql_using_psl_extensions(self):
         self.database = pgtools.PostgresDatabase(
