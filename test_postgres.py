@@ -224,6 +224,7 @@ class Test_PostgresServer:
 
     @pytest.fixture(autouse=True)
     def cleanup_dbms(self):
+        yield
         if hasattr(self, 'dbms'):
             self.dbms.destroy()
             del self.dbms
