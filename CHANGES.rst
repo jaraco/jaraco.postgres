@@ -1,3 +1,9 @@
+4.0
+===
+
+PostgresDatabase no longer uses 'pmxtest' as the default user,
+but instead defaults the username to the database name.
+
 3.0.1
 =====
 

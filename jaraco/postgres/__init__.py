@@ -65,7 +65,7 @@ class PostgresDatabase(object):
         db.drop()
         db.drop_user()
     '''
-    def __init__(self, db_name, user='pmxtest', host='localhost',
+    def __init__(self, db_name, user=None, host='localhost',
                  port=5432, superuser='postgres', template='template1'):
         '''Manage a database.  (Not a DBMS; just a database.)
 
@@ -75,11 +75,16 @@ class PostgresDatabase(object):
         @param db_name: The name of the database.
         @type schema: str
 
+        @param user: The user and owner of the database. Defaults to db_name.
+
         Note: Tested with postgresql 8.3
 
         WARNING: Some methods are open to SQL injection attack; don't pass
         unvetted values of <db_name>, <user>, etc.
         '''
+
+        user = user or db_name
+
         # Mild defense against SQL injection attacks.
         assert "'" not in user
         assert "'" not in db_name
