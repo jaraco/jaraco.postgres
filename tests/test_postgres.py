@@ -293,6 +293,30 @@ class Test_PostgresDatabase:
         self.database.create()
         self.database.super_psql(['-c', 'SELECT 1'])
 
+    def test_create_user_exists(self):
+        """
+        create_user raises an exception if the user already
+        exists
+        """
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
+            port=self.port,
+        )
+        self.database.create_user()
+        with pytest.raises(Exception):
+            self.database.create_user()
+
+    def test_ensure_user_exists(self):
+        """
+        ensure_user should not fail if user already exists
+        """
+        self.database = pgtools.PostgresDatabase(
+            db_name='test_pgtools',
+            port=self.port,
+        )
+        self.database.create_user()
+        self.database.ensure_user()
+
 
 class Test_PostgresServer:
 

@@ -153,6 +153,25 @@ class PostgresDatabase(object):
         """
         self.super_psql(['-c', "CREATE USER %s" % self.user])
 
+    def ensure_user(self):
+        """
+        Create the user but only if it does not yet exist.
+        """
+        sql = """DO
+            $do$
+            BEGIN
+               IF NOT EXISTS (
+                  SELECT
+                  FROM   pg_catalog.pg_roles
+                  WHERE  rolname = '{self.user}') THEN
+
+                  CREATE USER {self.user};
+               END IF;
+            END
+            $do$;
+            """
+        self.super_psql(['-c', sql.format(**locals())])
+
     def drop(self):
         """DROP this DATABASE, if it exists."""
         self.super_psql(['-c', "DROP DATABASE IF EXISTS %s" % self.db_name])
@@ -563,7 +582,7 @@ class PostgresServer(object):
         db = PostgresDatabase(
             db_name, host=self.host, port=self.port,
             superuser=self.superuser, **kwargs)
-        db.create_user()
+        db.ensure_user()
         db.create()
         return db
 

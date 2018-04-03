@@ -1,8 +1,16 @@
+4.1
+===
+
+Added PostgresDatabase.ensure_user, which will not fail if the
+user already exists. In PostgresServer.create, use ensure_user
+to allow multiple databases to be created using the same
+user.
+
 4.0
 ===
 
 PostgresDatabase no longer uses 'pmxtest' as the default user,
-but instead defaults the username to the database name.
+but instead the username defaults to the database name.
 
 3.0.1
 =====
