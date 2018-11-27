@@ -184,7 +184,7 @@ class PostgresDatabase(object):
         self.super_psql(['-c', "DROP USER IF EXISTS %s" % self.user])
 
     def psql(self, args):
-        """Invoke psql, passing the given command-line arguments.
+        r"""Invoke psql, passing the given command-line arguments.
 
         Typical <args> values: ['-c', <sql_string>] or ['-f', <pathname>].
 
