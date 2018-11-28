@@ -46,7 +46,7 @@ params = dict(
 			'pytest-flake8',
 
 			# local
-			'psycopg2',
+			'psycopg2-binary',
 		],
 		'docs': [
 			# upstream
