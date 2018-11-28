@@ -202,7 +202,7 @@ class Test_PostgresDatabase:
             db_name='test_pgtools',
             port=self.port)
         self.database.create_user()
-        self.database.create('\set ON_ERROR_STOP FALSE\nSYNTAX ERROR HERE')
+        self.database.create(r'\set ON_ERROR_STOP FALSE\nSYNTAX ERROR HERE')
 
     def test_drop(self):
         self.database = pgtools.PostgresDatabase(
