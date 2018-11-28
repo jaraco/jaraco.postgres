@@ -1,3 +1,8 @@
+4.2
+===
+
+Refresh package metadata.
+
 4.1
 ===
 
