@@ -1,3 +1,8 @@
+4.3
+===
+
+#6: Avoid use of deperecated ``yield_fixture``.
+
 4.2
 ===
 

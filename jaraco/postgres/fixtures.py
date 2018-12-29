@@ -4,7 +4,7 @@ import portend
 from . import PostgresServer
 
 
-@pytest.yield_fixture(scope="session")
+@pytest.fixture(scope="session")
 def postgresql_instance():
     try:
         port = portend.find_available_local_port()
