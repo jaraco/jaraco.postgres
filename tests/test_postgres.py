@@ -352,8 +352,8 @@ class Test_PostgresServer:
         # (But first, some checking to prevent hideously
         # self-destructive acts.)
         assert self.dbms.base_pathname is not None
-        assert self.dbms.base_pathname is not ''
-        assert self.dbms.base_pathname is not '.'
+        assert self.dbms.base_pathname != ''
+        assert self.dbms.base_pathname != '.'
         shutil.rmtree(self.dbms.base_pathname)
         self.dbms.destroy()
 
