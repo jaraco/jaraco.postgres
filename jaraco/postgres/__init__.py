@@ -373,7 +373,7 @@ class PostgresServer:
                     raise
                 time.sleep(0.2)
 
-    def initdb(self, quiet=True, locale='en_US.UTF-8'):
+    def initdb(self, quiet=True, locale='en_US.UTF-8', encoding=None):
         """Bootstrap this DBMS from nothing.
 
         If you're running in an environment where the DBMS is provided as part
@@ -398,6 +398,8 @@ class PostgresServer:
         ]
         if locale is not None:
             arguments.extend(('--locale', locale))
+        if encoding is not None:
+            arguments.extend(('--encoding', encoding))
         cmd = (
             [
                 PostgresFinder.find_root() / 'initdb',

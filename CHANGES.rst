@@ -1,3 +1,8 @@
+v5.1.0
+======
+
+#7: Allow ``encoding`` parameter to ``initdb``.
+
 5.0
 ===
 
