@@ -24,6 +24,11 @@ from jaraco.postgres import PostgresDatabase, PostgresServer
 HOST = os.environ.get('HOST', 'localhost')
 
 
+@pytest.fixture(autouse=True)
+def needs_postgresql(postgresql_instance):
+    pass
+
+
 class TestPostgresServer:
     def test_serves_postgres(self):
         port = portend.find_available_local_port()
