@@ -638,8 +638,8 @@ class PostgresFinder(paths.PathFinder):
         '/Program Files/pgsql/bin',
     ]
 
-    def _get_version_from_path(path):
-        version_str = re.search(r'\d+(\.\d+)?', path).group(0)
+    def _get_version_from_path(path: str):
+        version_str = re.search(r'\d+(\.\d+)?', path).group(0)  # type: ignore
         return packaging.version.Version(version_str)
 
     # Prefer the highest-numbered version available.
