@@ -1,5 +1,5 @@
 '''
-This module provides helpers for creating and managing databases.
+Helpers for creating and managing databases.
 
 This technique may be helpful in production code, and it's especially relevant
 to functional tests which depend on test databases.
@@ -27,8 +27,6 @@ Some errors provoke OSError, whereas other similar errors might provoke
 CalledProcessError or RuntimeError.  This should be made consistent.
 '''
 
-from __future__ import absolute_import, print_function
-
 import glob
 import logging
 import os
@@ -54,8 +52,8 @@ class NotInitializedError(Exception):
     "An exception raised when an uninitialized DBMS is asked to do something"
 
 
-class PostgresDatabase(object):
-    '''
+class PostgresDatabase:
+    """
     Typical usage:
         db = PostgresDatabase(db_name='test_db', user='test_user')
         db.create_user()
@@ -64,10 +62,18 @@ class PostgresDatabase(object):
         ...
         db.drop()
         db.drop_user()
-    '''
-    def __init__(self, db_name, user=None, host='localhost',
-                 port=5432, superuser='postgres', template='template1'):
-        '''Manage a database.  (Not a DBMS; just a database.)
+    """
+
+    def __init__(
+        self,
+        db_name,
+        user=None,
+        host='localhost',
+        port=5432,
+        superuser='postgres',
+        template='template1',
+    ):
+        """Manage a database.  (Not a DBMS; just a database.)
 
         This method doesn't do anything; it just remembers its params for use
         by subsequent method calls.
@@ -81,7 +87,7 @@ class PostgresDatabase(object):
 
         WARNING: Some methods are open to SQL injection attack; don't pass
         unvetted values of <db_name>, <user>, etc.
-        '''
+        """
 
         user = user or db_name
 
@@ -104,8 +110,12 @@ class PostgresDatabase(object):
             'superuser=%s, template=%s)'
         )
         return tmpl % (
-            self.db_name, self.user, self.host,
-            self.port, self.superuser, self.template
+            self.db_name,
+            self.user,
+            self.host,
+            self.port,
+            self.superuser,
+            self.template,
         )
 
     __str__ = __repr__
@@ -133,10 +143,14 @@ class PostgresDatabase(object):
         argv = [
             PostgresFinder.find_root() / 'psql',
             '--quiet',
-            '-U', self.user,
-            '-h', self.host,
-            '-p', self.port,
-            '-f', '-',
+            '-U',
+            self.user,
+            '-h',
+            self.host,
+            '-p',
+            self.port,
+            '-f',
+            '-',
             self.db_name,
         ]
         popen = subprocess.Popen(argv, stdin=subprocess.PIPE)
@@ -201,13 +215,20 @@ class PostgresDatabase(object):
         @return: None. Raises an exception upon error, but *ignores SQL
         errors* unless "\set ON_ERROR_STOP TRUE" is used.
         """
-        argv = [
-            PostgresFinder.find_root() / 'psql',
-            '--quiet',
-            '-U', self.user,
-            '-h', self.host,
-            '-p', self.port,
-        ] + args + [self.db_name]
+        argv = (
+            [
+                PostgresFinder.find_root() / 'psql',
+                '--quiet',
+                '-U',
+                self.user,
+                '-h',
+                self.host,
+                '-p',
+                self.port,
+            ]
+            + args
+            + [self.db_name]
+        )
         subprocess.check_call(argv)
 
     def sql(self, input_string, *args):
@@ -252,10 +273,9 @@ class PostgresDatabase(object):
         psycopg2 = importlib.import_module('psycopg2')
         importlib.import_module('psycopg2.extensions')
         connection = psycopg2.connect(
-            user=self.user, host=self.host,
-            port=self.port, database=self.db_name)
-        connection.set_isolation_level(
-            psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+            user=self.user, host=self.host, port=self.port, database=self.db_name
+        )
+        connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
         try:
             cursor = connection.cursor()
             cursor.execute(input_string, args)
@@ -274,17 +294,20 @@ class PostgresDatabase(object):
         argv = [
             PostgresFinder.find_root() / 'psql',
             '--quiet',
-            '-U', self.superuser,
-            '-h', self.host,
-            '-p', self.port,
+            '-U',
+            self.superuser,
+            '-h',
+            self.host,
+            '-p',
+            self.port,
         ] + args
         subprocess.check_call(argv)
 
 
-class PostgresServer(object):
+class PostgresServer:
     def __init__(
-            self, host='localhost', port=5432, base_pathname=None,
-            superuser='postgres'):
+        self, host='localhost', port=5432, base_pathname=None, superuser='postgres'
+    ):
         """This class represents a DBMS server.
 
         This class can represent either
@@ -370,18 +393,21 @@ class PostgresServer(object):
         # The database superuser needs no password at this point(!).
         arguments = [
             '--auth=trust',
-            '--username', self.superuser,
+            '--username',
+            self.superuser,
         ]
         if locale is not None:
             arguments.extend(('--locale', locale))
         if encoding is not None:
             arguments.extend(('--encoding', encoding))
-        cmd = [
-            PostgresFinder.find_root() / 'initdb',
-        ] + arguments + ['--pgdata', self.base_pathname]
-        log.info('Initializing PostgreSQL with command: {}'.format(
-            ' '.join(cmd)
-        ))
+        cmd = (
+            [
+                PostgresFinder.find_root() / 'initdb',
+            ]
+            + arguments
+            + ['--pgdata', self.base_pathname]
+        )
+        log.info('Initializing PostgreSQL with command: {}'.format(' '.join(cmd)))
         subprocess.check_call(cmd, stdout=stdout)
 
     @property
@@ -394,9 +420,11 @@ class PostgresServer(object):
         query = tmpl.format(**locals())
         cmd = [
             PostgresFinder.find_root() / 'psql',
-            '-p', self.port,
+            '-p',
+            self.port,
             'postgres',
-            '-c', query,
+            '-c',
+            query,
             '-t',
         ]
         return subprocess.check_output(cmd)
@@ -441,7 +469,7 @@ class PostgresServer(object):
         votes = 0
         while abs(votes) < tries:
             time.sleep(0.1)
-            running = (subprocess.call(cmd, stdout=DEV_NULL) == 0)
+            running = subprocess.call(cmd, stdout=DEV_NULL) == 0
             if running and votes >= 0:
                 votes += 1
             elif not running and votes <= 0:
@@ -461,9 +489,12 @@ class PostgresServer(object):
     def _psql_cmd(self):
         return [
             PostgresFinder.find_root() / 'psql',
-            '-h', self.host,
-            '-p', self.port,
-            '-U', self.superuser,
+            '-h',
+            self.host,
+            '-p',
+            self.port,
+            '-U',
+            self.superuser,
         ]
 
     def ready(self):
@@ -474,9 +505,7 @@ class PostgresServer(object):
         """
         cmd = self._psql_cmd()
         for i in range(50, -1, -1):
-            res = subprocess.call(
-                cmd, stdin=DEV_NULL, stdout=DEV_NULL,
-                stderr=DEV_NULL)
+            res = subprocess.call(cmd, stdin=DEV_NULL, stdout=DEV_NULL, stderr=DEV_NULL)
             if res == 0:
                 break
             time.sleep(0.2)
@@ -484,8 +513,7 @@ class PostgresServer(object):
 
     @property
     def pid(self):
-        """The server's PID (None if not running).
-        """
+        """The server's PID (None if not running)."""
         # We can't possibly be running if our base_pathname isn't defined.
         if not self.base_pathname:
             return None
@@ -517,8 +545,7 @@ class PostgresServer(object):
         """
         log.info('Starting PostgreSQL at %s:%s', self.host, self.port)
         if not self.base_pathname:
-            tmpl = ('Invalid base_pathname: %r.  Did you forget to call '
-                    '.initdb()?')
+            tmpl = 'Invalid base_pathname: %r.  Did you forget to call ' '.initdb()?'
             raise NotInitializedError(tmpl % self.base_pathname)
 
         conf_file = os.path.join(self.base_pathname, 'postgresql.conf')
@@ -536,24 +563,34 @@ class PostgresServer(object):
                 # When running not as root, postgres might try to put files
                 #  where they're not writable (see
                 #  https://paste.yougov.net/YKdgi). So set the socket_dir.
-                '-c', '{}={}'.format(socketop, self.base_pathname),
-                '-h', self.host,
+                '-c',
+                '{}={}'.format(socketop, self.base_pathname),
+                '-h',
+                self.host,
                 '-i',  # enable TCP/IP connections
-                '-p', self.port,
+                '-p',
+                self.port,
             ]
-            subprocess.check_call([
-                PostgresFinder.find_root() / 'pg_ctl',
-                'start',
-                '-D', self.base_pathname,
-                '-l', os.path.join(self.base_pathname, 'postgresql.log'),
-                '-o', subprocess.list2cmdline(postgres_options),
-            ])
+            subprocess.check_call(
+                [
+                    PostgresFinder.find_root() / 'pg_ctl',
+                    'start',
+                    '-D',
+                    self.base_pathname,
+                    '-l',
+                    os.path.join(self.base_pathname, 'postgresql.log'),
+                    '-o',
+                    subprocess.list2cmdline(postgres_options),
+                ]
+            )
 
         # Postgres may launch, then abort if it's unhappy with some parameter.
         # This post-launch test helps us decide.
         if not self.is_running():
-            tmpl = ('%s aborted immediately after launch, check '
-                    'postgresql.log in storage dir')
+            tmpl = (
+                '%s aborted immediately after launch, check '
+                'postgresql.log in storage dir'
+            )
             raise RuntimeError(tmpl % self)
 
     def stop(self):
@@ -566,8 +603,10 @@ class PostgresServer(object):
             cmd = [
                 PostgresFinder.find_root() / 'pg_ctl',
                 'stop',
-                '-D', self.base_pathname,
-                '-m', 'fast',
+                '-D',
+                self.base_pathname,
+                '-m',
+                'fast',
             ]
             subprocess.check_call(cmd)
             # pg_ctl isn't reliable if it's called at certain critical times
@@ -582,8 +621,8 @@ class PostgresServer(object):
         Construct a PostgresDatabase and create it on self
         """
         db = PostgresDatabase(
-            db_name, host=self.host, port=self.port,
-            superuser=self.superuser, **kwargs)
+            db_name, host=self.host, port=self.port, superuser=self.superuser, **kwargs
+        )
         db.ensure_user()
         db.create()
         return db
@@ -599,14 +638,17 @@ class PostgresFinder(paths.PathFinder):
         '/Program Files/pgsql/bin',
     ]
 
-    def _get_version_from_path(path):
-        version_str = re.search(r'\d+(\.\d+)?', path).group(0)
+    def _get_version_from_path(path: str):
+        version_str = re.search(r'\d+(\.\d+)?', path).group(0)  # type: ignore
         return packaging.version.Version(version_str)
 
     # Prefer the highest-numbered version available.
     heuristic_paths.extend(
-        sorted(glob.glob('/usr/lib/postgresql/*/bin'),
-               reverse=True, key=_get_version_from_path)
+        sorted(
+            glob.glob('/usr/lib/postgresql/*/bin'),
+            reverse=True,
+            key=_get_version_from_path,
+        )
     )
 
     # allow the environment to stipulate where Postgres must
