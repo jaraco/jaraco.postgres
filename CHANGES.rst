@@ -3,6 +3,8 @@ v5.1.0
 
 #7: Allow ``encoding`` parameter to ``initdb``.
 
+Package now uses PEP 420 for namespace package.
+
 5.0
 ===
 
