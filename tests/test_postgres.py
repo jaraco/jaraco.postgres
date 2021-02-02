@@ -6,8 +6,6 @@ Functional tests for the jaraco.postgres module.
 Intended to be run using py.test.
 '''
 
-from __future__ import unicode_literals
-
 import io
 import os
 import shutil

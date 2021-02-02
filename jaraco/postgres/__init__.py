@@ -1,5 +1,5 @@
 '''
-This module provides helpers for creating and managing databases.
+Helpers for creating and managing databases.
 
 This technique may be helpful in production code, and it's especially relevant
 to functional tests which depend on test databases.
@@ -27,8 +27,6 @@ Some errors provoke OSError, whereas other similar errors might provoke
 CalledProcessError or RuntimeError.  This should be made consistent.
 '''
 
-from __future__ import absolute_import, print_function
-
 import glob
 import logging
 import os
@@ -54,7 +52,7 @@ class NotInitializedError(Exception):
     "An exception raised when an uninitialized DBMS is asked to do something"
 
 
-class PostgresDatabase(object):
+class PostgresDatabase:
     """
     Typical usage:
         db = PostgresDatabase(db_name='test_db', user='test_user')
@@ -306,7 +304,7 @@ class PostgresDatabase(object):
         subprocess.check_call(argv)
 
 
-class PostgresServer(object):
+class PostgresServer:
     def __init__(
         self, host='localhost', port=5432, base_pathname=None, superuser='postgres'
     ):
