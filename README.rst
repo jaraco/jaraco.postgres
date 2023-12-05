@@ -3,7 +3,7 @@
 
 .. image:: https://img.shields.io/pypi/pyversions/jaraco.postgres.svg
 
-.. image:: https://github.com/jaraco/jaraco.postgres/workflows/tests/badge.svg
+.. image:: https://github.com/jaraco/jaraco.postgres/actions/workflows/main.yml/badge.svg
    :target: https://github.com/jaraco/jaraco.postgres/actions?query=workflow%3A%22tests%22
    :alt: tests
 
