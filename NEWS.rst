@@ -1,3 +1,12 @@
+v5.2.0
+======
+
+Features
+--------
+
+- Packaging refresh.
+
+
 v5.1.0
 ======
 
