@@ -197,23 +197,22 @@ class PostgresDatabase:
         """DROP this USER, if it exists."""
         self.super_psql(['-c', "DROP USER IF EXISTS %s" % self.user])
 
-    def psql(self, args):
+    def psql(self, args) -> None:
         r"""Invoke psql, passing the given command-line arguments.
 
         Typical <args> values: ['-c', <sql_string>] or ['-f', <pathname>].
 
-        Connection parameters are taken from self.  STDIN, STDOUT,
+        Connection parameters are taken from self. STDIN, STDOUT,
         and STDERR are inherited from the parent.
 
         WARNING: This method uses the psql(1) program, which ignores SQL
-        errors
-        by default.  That hides many real errors, making our software less
-        reliable.  To overcome this flaw, add this line to the head of your
-        SQL:
+        errors by default. That approach masks real errors and degrades
+        reliability. To overcome this weakness, add the following line to
+        the head of the SQL definition::
+
             "\set ON_ERROR_STOP TRUE"
 
-        @return: None. Raises an exception upon error, but *ignores SQL
-        errors* unless "\set ON_ERROR_STOP TRUE" is used.
+        Raises an exception upon error.
         """
         argv = (
             [
