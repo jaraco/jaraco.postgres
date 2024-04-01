@@ -306,6 +306,11 @@ class PostgresDatabase:
         subprocess.check_call(argv)
 
 
+def first_line(filepath):
+    with open(filepath, encoding='utf-8') as strm:
+        return next(strm)
+
+
 class PostgresServer:
     def __init__(
         self, host='localhost', port=5432, base_pathname=None, superuser='postgres'
@@ -524,7 +529,7 @@ class PostgresServer:
             return None
         try:
             pidfile = os.path.join(self.base_pathname, 'postmaster.pid')
-            return int(open(pidfile).readline())
+            return int(first_line(pidfile))
         except OSError:
             return None
 
