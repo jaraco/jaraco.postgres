@@ -505,7 +505,10 @@ class PostgresServer:
             self.superuser,
         ]
 
-    @ExceptionTrap(subprocess.CalledProcessError).passes
+    # Python 3.8 compat
+    passes_CalledProcessError = ExceptionTrap(subprocess.CalledProcessError).passes
+
+    @passes_CalledProcessError
     @retry(
         retries=49,
         trap=subprocess.CalledProcessError,
