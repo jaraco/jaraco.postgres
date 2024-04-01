@@ -74,27 +74,10 @@ class TestPostgresServer:
             server.destroy()
 
 
-class TestPostgresDatabase:
-    def test_creates_user_and_database(self, postgresql_instance):
-        database = PostgresDatabase(
-            'tests',
-            user='john',
-            host=postgresql_instance.host,
-            port=postgresql_instance.port,
-        )
-
-        database.create_user()
-        database.create()
-
-        rows = database.sql('SELECT 1')
-
-        assert rows == [(1,)]
-
-
 UNUSED_PORT = portend.find_available_local_port()
 
 
-class Test_PostgresDatabase:
+class TestPostgresDatabase:
     @pytest.fixture(scope='class', autouse=True)
     def dbms(self, request):
         cls = request.cls
@@ -112,6 +95,21 @@ class Test_PostgresDatabase:
         if hasattr(self, 'database'):
             self.database.drop_if_exists()
             self.database.drop_user()
+
+    def test_creates_user_and_database(self, postgresql_instance):
+        database = self.database = PostgresDatabase(
+            'tests',
+            user='john',
+            host=postgresql_instance.host,
+            port=postgresql_instance.port,
+        )
+
+        database.create_user()
+        database.create()
+
+        rows = database.sql('SELECT 1')
+
+        assert rows == [(1,)]
 
     def test___init__can_create_multiple_databases(self):
         database_1 = None
