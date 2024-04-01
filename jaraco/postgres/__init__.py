@@ -571,18 +571,16 @@ class PostgresServer:
                 '-p',
                 self.port,
             ]
-            subprocess.check_call(
-                [
-                    PostgresFinder.find_root() / 'pg_ctl',
-                    'start',
-                    '-D',
-                    self.base_pathname,
-                    '-l',
-                    os.path.join(self.base_pathname, 'postgresql.log'),
-                    '-o',
-                    subprocess.list2cmdline(postgres_options),
-                ]
-            )
+            subprocess.check_call([
+                PostgresFinder.find_root() / 'pg_ctl',
+                'start',
+                '-D',
+                self.base_pathname,
+                '-l',
+                os.path.join(self.base_pathname, 'postgresql.log'),
+                '-o',
+                subprocess.list2cmdline(postgres_options),
+            ])
 
         # Postgres may launch, then abort if it's unhappy with some parameter.
         # This post-launch test helps us decide.
