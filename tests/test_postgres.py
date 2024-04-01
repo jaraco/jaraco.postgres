@@ -1,23 +1,19 @@
-# coding: utf-8
-
 '''
 Functional tests for the jaraco.postgres module.
 
 Intended to be run using py.test.
 '''
 
-import io
 import os
 import shutil
 from subprocess import CalledProcessError
 
-import psycopg2
 import portend
+import psycopg2
 import pytest
 
 import jaraco.postgres as pgtools
 from jaraco.postgres import PostgresDatabase, PostgresServer
-
 
 HOST = os.environ.get('HOST', 'localhost')
 
@@ -53,7 +49,7 @@ class TestPostgresServer:
             server.get_version()  # To check we're able to talk to it.
 
             config = os.path.join(server.base_pathname, 'postgresql.conf')
-            with io.open(config, encoding='utf-8') as strm:
+            with open(config, encoding='utf-8') as strm:
                 expect = "lc_messages = 'C'"
                 assert any(expect in line for line in strm)
         finally:
@@ -305,16 +301,14 @@ class Test_PostgresServer:
     def test___repr__(self):
         self.dbms = pgtools.PostgresServer(host='localhost', port=UNUSED_PORT)
         assert repr(self.dbms) == (
-            'PostgresServer(host=localhost, port=%s, '
-            'base_pathname=%s, superuser=%s)'
-            % (self.dbms.port, self.dbms.base_pathname, self.dbms.superuser)
+            f'PostgresServer(host=localhost, port={self.dbms.port}, '
+            f'base_pathname={self.dbms.base_pathname}, superuser={self.dbms.superuser})'
         )
 
     def test___str__(self):
         self.dbms = pgtools.PostgresServer(host='localhost', port=UNUSED_PORT)
         assert str(self.dbms) == (
-            'PostgreSQL server at %s:%s (with storage at %s)'
-            % (self.dbms.host, self.dbms.port, self.dbms.base_pathname)
+            f'PostgreSQL server at {self.dbms.host}:{self.dbms.port} (with storage at {self.dbms.base_pathname})'
         )
 
     def test_destroy_handles_deleted_directory(self):

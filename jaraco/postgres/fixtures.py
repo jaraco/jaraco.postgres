@@ -1,5 +1,5 @@
-import pytest
 import portend
+import pytest
 
 from . import PostgresServer
 

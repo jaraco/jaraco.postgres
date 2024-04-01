@@ -28,20 +28,20 @@ CalledProcessError or RuntimeError.  This should be made consistent.
 '''
 
 import glob
+import importlib
+import itertools
 import logging
 import os
+import re
 import shutil
 import signal
 import subprocess
 import tempfile
 import time
-import importlib
-import itertools
-import re
 
 import packaging.version
-from jaraco.services import paths
 
+from jaraco.services import paths
 
 DEV_NULL = open(os.path.devnull, 'r+', encoding='utf-8')
 
@@ -367,7 +367,7 @@ class PostgresServer:
         while os.path.isdir(path):
             try:
                 shutil.rmtree(path)
-            except WindowsError:
+            except OSError:
                 if next(tries) >= max_tries:
                     raise
                 time.sleep(0.2)
@@ -520,7 +520,7 @@ class PostgresServer:
         try:
             pidfile = os.path.join(self.base_pathname, 'postmaster.pid')
             return int(open(pidfile).readline())
-        except (IOError, OSError):
+        except OSError:
             return None
 
     @staticmethod
@@ -564,7 +564,7 @@ class PostgresServer:
                 #  where they're not writable (see
                 #  https://paste.yougov.net/YKdgi). So set the socket_dir.
                 '-c',
-                '{}={}'.format(socketop, self.base_pathname),
+                f'{socketop}={self.base_pathname}',
                 '-h',
                 self.host,
                 '-i',  # enable TCP/IP connections
