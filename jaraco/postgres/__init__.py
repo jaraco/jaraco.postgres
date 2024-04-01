@@ -42,9 +42,9 @@ import time
 
 import packaging.version
 
-from jaraco.services import paths
-from jaraco.functools import retry
 from jaraco.context import ExceptionTrap
+from jaraco.functools import retry
+from jaraco.services import paths
 
 DEV_NULL = open(os.path.devnull, 'r+', encoding='utf-8')
 

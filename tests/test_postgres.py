@@ -272,7 +272,7 @@ class TestPostgresDatabase:
             port=self.port,
         )
         self.database.create_user()
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017
             self.database.create_user()
 
     def test_ensure_user_exists(self):
