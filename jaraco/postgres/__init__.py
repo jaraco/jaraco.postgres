@@ -27,6 +27,7 @@ Some errors provoke OSError, whereas other similar errors might provoke
 CalledProcessError or RuntimeError.  This should be made consistent.
 '''
 
+import functools
 import glob
 import importlib
 import itertools
@@ -42,6 +43,8 @@ import time
 import packaging.version
 
 from jaraco.services import paths
+from jaraco.functools import retry
+from jaraco.context import ExceptionTrap
 
 DEV_NULL = open(os.path.devnull, 'r+', encoding='utf-8')
 
@@ -497,19 +500,21 @@ class PostgresServer:
             self.superuser,
         ]
 
+    @ExceptionTrap(subprocess.CalledProcessError).passes
+    @retry(
+        retries=49,
+        trap=subprocess.CalledProcessError,
+        cleanup=functools.partial(time.sleep, 0.2),
+    )
     def ready(self):
         """
         Assumes postgres now talks to pg_ctl, but might not yet be listening
-        or connections from psql.  Test that psql is able to connect, as
+        for connections from psql. Test that psql is able to connect, as
         it occasionally takes 5-10 seconds for postgresql to start listening.
         """
-        cmd = self._psql_cmd()
-        for i in range(50, -1, -1):
-            res = subprocess.call(cmd, stdin=DEV_NULL, stdout=DEV_NULL, stderr=DEV_NULL)
-            if res == 0:
-                break
-            time.sleep(0.2)
-        return i != 0
+        subprocess.check_call(
+            self._psql_cmd(), stdin=DEV_NULL, stdout=DEV_NULL, stderr=DEV_NULL
+        )
 
     @property
     def pid(self):
