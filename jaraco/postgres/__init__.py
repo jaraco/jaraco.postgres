@@ -433,13 +433,14 @@ class PostgresServer:
         Return True if this server is currently running and reachable.
 
         The postgres tools have critical windows during which they give
-        misbehave
-        or give the wrong answer.  If postgres was just launched:
-            - it might not yet appear to be running, or
-            - pg_ctl might think that it's running, but psql might not yet
-              be able to connect to it, or
-            - it might be about to abort because of a configuration problem,
-            - or all three!  It might be starting up, but about to abort.
+        misbehave or give the wrong answer. If postgres was just launched:
+
+        - it might not yet appear to be running, or
+        - pg_ctl might think that it's running, but psql might not yet
+          be able to connect to it, or
+        - it might be about to abort because of a configuration problem,
+        - or all three!  It might be starting up, but about to abort.
+
         Sadly, it's not easy to make a declaration about state if the server
         just started
         or stopped.  To increase confidence, makes repeated checks,
