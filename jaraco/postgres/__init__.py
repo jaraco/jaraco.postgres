@@ -43,7 +43,7 @@ import packaging.version
 from jaraco.services import paths
 
 
-DEV_NULL = open(os.path.devnull, 'r+')
+DEV_NULL = open(os.path.devnull, 'r+', encoding='utf-8')
 
 log = logging.getLogger('jaraco.postgres')
 
