@@ -74,22 +74,13 @@ class TestPostgresServer:
             server.destroy()
 
 
-@pytest.fixture
-def local_instance(request):
-    request.instance.port = port = portend.find_available_local_port()
-    server = PostgresServer(HOST, port)
-    try:
-        server.initdb()
-        server.start()
-        yield server
-    finally:
-        server.destroy()
-
-
 class TestPostgresDatabase:
-    def test_creates_user_and_database(self, local_instance):
+    def test_creates_user_and_database(self, postgresql_instance):
         database = PostgresDatabase(
-            'tests', user='john', host=HOST, port=local_instance.port
+            'tests',
+            user='john',
+            host=postgresql_instance.host,
+            port=postgresql_instance.port,
         )
 
         database.create_user()
