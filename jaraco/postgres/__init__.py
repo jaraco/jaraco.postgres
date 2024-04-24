@@ -46,8 +46,6 @@ from jaraco.context import ExceptionTrap
 from jaraco.functools import retry
 from jaraco.services import paths
 
-DEV_NULL = open(os.path.devnull, 'r+', encoding='utf-8')
-
 log = logging.getLogger('jaraco.postgres')
 
 
@@ -396,7 +394,7 @@ class PostgresServer:
             self.base_pathname = tempfile.mkdtemp()
         if not os.path.isdir(self.base_pathname):
             os.mkdir(self.base_pathname)
-        stdout = DEV_NULL if quiet else None
+        stdout = subprocess.DEVNULL if quiet else None
         # The database superuser needs no password at this point(!).
         arguments = [
             '--auth=trust',
@@ -477,7 +475,7 @@ class PostgresServer:
         votes = 0
         while abs(votes) < tries:
             time.sleep(0.1)
-            running = subprocess.call(cmd, stdout=DEV_NULL) == 0
+            running = subprocess.call(cmd, stdout=subprocess.DEVNULL) == 0
             if running and votes >= 0:
                 votes += 1
             elif not running and votes <= 0:
@@ -521,7 +519,10 @@ class PostgresServer:
         it occasionally takes 5-10 seconds for postgresql to start listening.
         """
         subprocess.check_call(
-            self._psql_cmd(), stdin=DEV_NULL, stdout=DEV_NULL, stderr=DEV_NULL
+            self._psql_cmd(),
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
 
     @property
