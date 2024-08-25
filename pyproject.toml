@@ -74,4 +74,9 @@ type = [
 [project.entry-points]
 pytest11 = {PostgreSQL = "jaraco.postgres.fixtures"}
 
+
 [tool.setuptools_scm]
+
+
+[tool.pytest-enabler.mypy]
+# Disabled due to jaraco/skeleton#143
