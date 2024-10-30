@@ -48,6 +48,8 @@ from jaraco.services import paths
 
 log = logging.getLogger('jaraco.postgres')
 
+_VERSION_PATTERN = re.compile(r'\d+(\.\d+)?')
+
 
 class NotInitializedError(Exception):
     "An exception raised when an uninitialized DBMS is asked to do something"
@@ -651,7 +653,12 @@ class PostgresFinder(paths.PathFinder):
     ]
 
     def _get_version_from_path(path: str):
-        version_str = re.search(r'\d+(\.\d+)?', path).group(0)  # type: ignore
+        match = re.search(_VERSION_PATTERN, path)
+        if not match:
+            raise ValueError(
+                f"No version matching /{_VERSION_PATTERN.pattern}/ in '{path}'"
+            )
+        version_str = match.group(0)
         return packaging.version.Version(version_str)
 
     # Prefer the highest-numbered version available.
