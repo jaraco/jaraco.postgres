@@ -559,7 +559,7 @@ class PostgresServer:
         """
         log.info('Starting PostgreSQL at %s:%s', self.host, self.port)
         if not self.base_pathname:
-            tmpl = 'Invalid base_pathname: %r.  Did you forget to call ' '.initdb()?'
+            tmpl = 'Invalid base_pathname: %r.  Did you forget to call .initdb()?'
             raise NotInitializedError(tmpl % self.base_pathname)
 
         conf_file = os.path.join(self.base_pathname, 'postgresql.conf')
