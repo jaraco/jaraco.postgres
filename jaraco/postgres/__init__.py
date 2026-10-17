@@ -39,9 +39,9 @@ import signal
 import subprocess
 import tempfile
 import time
+from typing import ClassVar
 
 import packaging.version
-
 from jaraco.context import ExceptionTrap
 from jaraco.functools import retry
 from jaraco.services import paths
@@ -166,7 +166,7 @@ class PostgresDatabase:
         Beware that this method is open to SQL injection attack.  Don't use
         unvetted values of self.user.
         """
-        self.super_psql(['-c', "CREATE USER %s" % self.user])
+        self.super_psql(['-c', f"CREATE USER {self.user}"])
 
     def ensure_user(self):
         """
@@ -189,14 +189,14 @@ class PostgresDatabase:
 
     def drop(self):
         """DROP this DATABASE, if it exists."""
-        self.super_psql(['-c', "DROP DATABASE IF EXISTS %s" % self.db_name])
+        self.super_psql(['-c', f"DROP DATABASE IF EXISTS {self.db_name}"])
 
     # For legacy compatibility.
     drop_if_exists = drop
 
     def drop_user(self):
         """DROP this USER, if it exists."""
-        self.super_psql(['-c', "DROP USER IF EXISTS %s" % self.user])
+        self.super_psql(['-c', f"DROP USER IF EXISTS {self.user}"])
 
     def psql(self, args) -> None:
         r"""Invoke psql, passing the given command-line arguments.
@@ -643,7 +643,7 @@ class PostgresServer:
 class PostgresFinder(paths.PathFinder):
     # Where are the postgres executables?  Consider the following pathnames in
     # order.
-    heuristic_paths = [
+    heuristic_paths: ClassVar = [
         # look on $PATH
         '',
         '/usr/local/pgsql/bin/',
@@ -665,7 +665,7 @@ class PostgresFinder(paths.PathFinder):
 
     # allow the environment to stipulate where Postgres must
     #  be found.
-    env_paths = [
+    env_paths: ClassVar = [
         os.path.join(os.environ[key], 'bin')
         for key in ['POSTGRESQL_HOME']
         if key in os.environ
@@ -674,4 +674,4 @@ class PostgresFinder(paths.PathFinder):
     candidate_paths = env_paths or heuristic_paths
 
     exe = 'pg_ctl'
-    args = ['--version']
+    args: ClassVar = ['--version']

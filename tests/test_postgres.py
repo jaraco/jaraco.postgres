@@ -148,7 +148,7 @@ class TestPostgresDatabase:
         assert repr(self.database) == (
             'PostgresDatabase(db_name=test_pgtools, user=pmxtest, '
             'host=localhost,'
-            ' port=%s, superuser=postgres, template=template1)' % self.port
+            f' port={self.port}, superuser=postgres, template=template1)'
         )
 
     def test___str__(self):
@@ -163,7 +163,7 @@ class TestPostgresDatabase:
         assert str(self.database) == (
             'PostgresDatabase(db_name=test_pgtools, user=pmxtest, '
             'host=localhost,'
-            ' port=%s, superuser=postgres, template=template1)' % self.port
+            f' port={self.port}, superuser=postgres, template=template1)'
         )
 
     def test_create_fails_when_user_nonexistent(self):
