@@ -50,8 +50,9 @@ class TestPostgresServer:
 
             config = os.path.join(server.base_pathname, 'postgresql.conf')
             with open(config, encoding='utf-8') as strm:
-                expect = "lc_messages = 'C'"
-                assert any(expect in line for line in strm)
+                # PostgreSQL 17+ omits the quotes for identifier-like values
+                expect = "lc_messages = 'C'", "lc_messages = C"
+                assert any(line.startswith(expect) for line in strm)
         finally:
             server.destroy()
 
