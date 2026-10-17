@@ -76,8 +76,8 @@ UNUSED_PORT = portend.find_available_local_port()
 
 class TestPostgresDatabase:
     @pytest.fixture(scope='class', autouse=True)
-    def dbms(self, request):
-        cls = request.cls
+    @classmethod
+    def dbms(cls):
         cls.port = UNUSED_PORT
         cls.dbms = pgtools.PostgresServer(port=cls.port)
         cls.dbms.initdb()
